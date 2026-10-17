@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="0.2">
+      <stop offset="0" stop-color="#d9b995"/><stop offset="0.38" stop-color="#a77b58"/><stop offset="1" stop-color="#4a3022"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a5236"/><stop offset="1" stop-color="#3a2619"/></linearGradient>
+    <linearGradient id="counter" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a5a39"/><stop offset="1" stop-color="#3b2619"/></linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3dc" stop-opacity=".3"/><stop offset="1" stop-color="#fff3dc" stop-opacity="0"/></linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#ffd9a0" stop-opacity=".95"/><stop offset=".35" stop-color="#ffc474" stop-opacity=".35"/><stop offset="1" stop-color="#ffc474" stop-opacity="0"/></radialGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6f7a46"/><stop offset="1" stop-color="#2f3a22"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="soft2"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+
+  <rect width="1200" height="900" fill="url(#wall)"/>
+  <!-- tường gỗ phía sau quầy -->
+  <rect x="560" y="0" width="640" height="560" fill="#3a271b"/>
+  <g opacity=".5">
+    <rect x="560" y="0" width="640" height="560" fill="url(#wall)" opacity=".15"/>
+    <g stroke="#2a1b12" stroke-width="3" opacity=".6">
+      <path d="M640 0v560M720 0v560M800 0v560M880 0v560M960 0v560M1040 0v560M1120 0v560"/>
+    </g>
+  </g>
+  <!-- bảng hiệu -->
+  <g font-family="Georgia,serif" fill="#f3e2c4" opacity=".92" font-size="19" letter-spacing="5">
+    <text x="852" y="236">GOOD</text><text x="852" y="262">COFFEE</text><text x="852" y="288">BRIGHTER</text><text x="852" y="314">DAYS</text>
+  </g>
+
+  <!-- kệ + cốc -->
+  <g>
+    <rect x="990" y="150" width="210" height="8" fill="#1f130c"/>
+    <rect x="990" y="250" width="210" height="8" fill="#1f130c"/>
+    <g fill="#e9dcc6">
+      <rect x="1004" y="112" width="26" height="38" rx="4"/><rect x="1040" y="118" width="26" height="32" rx="4"/><rect x="1076" y="108" width="26" height="42" rx="4"/><rect x="1112" y="116" width="26" height="34" rx="4"/><rect x="1148" y="110" width="26" height="40" rx="4"/>
+      <rect x="1008" y="214" width="30" height="36" rx="4" opacity=".85"/><rect x="1050" y="222" width="30" height="28" rx="4" opacity=".85"/><rect x="1092" y="212" width="30" height="38" rx="4" opacity=".85"/><rect x="1134" y="220" width="30" height="30" rx="4" opacity=".85"/>
+    </g>
+    <g fill="#5d7340"><ellipse cx="1040" cy="100" rx="22" ry="16"/><ellipse cx="1150" cy="196" rx="26" ry="18"/><ellipse cx="1000" cy="198" rx="18" ry="14"/></g>
+  </g>
+
+  <!-- đèn thả -->
+  <g>
+    <g stroke="#120b07" stroke-width="2.5"><path d="M884 0V150M984 0V96M1086 0V168"/></g>
+    <g fill="#16100b"><path d="M858 150h52l-8 -22a18 14 0 0 0 -36 0z"/><path d="M958 96h52l-8 -22a18 14 0 0 0 -36 0z"/><path d="M1060 168h52l-8 -22a18 14 0 0 0 -36 0z"/></g>
+    <circle cx="884" cy="166" r="90" fill="url(#glow)"/><circle cx="984" cy="112" r="80" fill="url(#glow)"/><circle cx="1086" cy="184" r="90" fill="url(#glow)"/>
+  </g>
+
+  <!-- máy pha cà phê + quầy -->
+  <g>
+    <rect x="860" y="400" width="220" height="86" rx="6" fill="#241913"/>
+    <rect x="876" y="378" width="188" height="26" rx="5" fill="#2e211a"/>
+    <g fill="#b9a58c" opacity=".85"><rect x="890" y="430" width="26" height="40" rx="4"/><rect x="930" y="430" width="26" height="40" rx="4"/><rect x="1000" y="438" width="40" height="34" rx="4"/></g>
+    <rect x="1096" y="414" width="90" height="72" rx="4" fill="#1b130e"/>
+    <path d="M300 520h900v44H300z" fill="#9a6a45"/>
+    <path d="M300 520h900v8H300z" fill="#d1a272" opacity=".85"/>
+    <rect x="300" y="564" width="900" height="260" fill="url(#counter)"/>
+    <g stroke="#1c120c" stroke-width="2" opacity=".5"><path d="M380 564v260M470 564v260M560 564v260M650 564v260M740 564v260M830 564v260M920 564v260M1010 564v260M1100 564v260"/></g>
+    <g fill="#d8c2a0"><ellipse cx="520" cy="514" rx="28" ry="8"/><rect x="494" y="486" width="52" height="28" rx="6"/><ellipse cx="740" cy="514" rx="22" ry="6"/><rect x="720" y="492" width="40" height="22" rx="5"/></g>
+  </g>
+
+  <!-- sàn -->
+  <rect y="824" width="1200" height="76" fill="url(#floor)"/>
+
+  <!-- ghế gỗ -->
+  <g fill="#6a432a">
+    <path d="M520 600h130a12 12 0 0 1 12 12v18H508v-18a12 12 0 0 1 12-12z"/>
+    <rect x="538" y="630" width="16" height="200" rx="4"/><rect x="624" y="630" width="16" height="200" rx="4"/>
+    <path d="M512 520q70 -34 150 0v70q-75 -26 -150 0z" fill="#7d5030"/>
+    <path d="M760 612h120a12 12 0 0 1 12 12v18H748v-18a12 12 0 0 1 12-12z"/>
+    <rect x="778" y="642" width="15" height="190" rx="4"/><rect x="848" y="642" width="15" height="190" rx="4"/>
+  </g>
+  <path d="M900 560q130 -120 300 -90v300q-170 40 -300 -30z" fill="#7a4a2c"/>
+  <path d="M900 560q130 -120 300 -90" fill="none" stroke="#a9744b" stroke-width="6" opacity=".7"/>
+
+  <!-- cây trong chậu -->
+  <g>
+    <path d="M360 840h118l-14 -120h-90z" fill="#8c8068"/><path d="M366 836h106l-10 -100h-86z" fill="#a39679" opacity=".6"/>
+    <path d="M418 724C418 560 404 440 380 330M418 640C440 560 470 500 520 430M410 560C380 500 330 450 290 410M400 470C430 400 450 340 470 270" stroke="#2c1d13" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <g fill="url(#leaf)">
+      <ellipse cx="380" cy="280" rx="86" ry="64"/><ellipse cx="450" cy="230" rx="78" ry="58"/><ellipse cx="300" cy="330" rx="80" ry="56"/>
+      <ellipse cx="500" cy="330" rx="84" ry="58"/><ellipse cx="540" cy="420" rx="74" ry="50"/><ellipse cx="270" cy="410" rx="70" ry="48"/>
+      <ellipse cx="400" cy="380" rx="90" ry="60"/><ellipse cx="470" cy="470" rx="70" ry="46"/><ellipse cx="340" cy="470" rx="64" ry="44"/>
+    </g>
+    <g fill="#9aa563" opacity=".55"><ellipse cx="350" cy="250" rx="40" ry="22"/><ellipse cx="470" cy="215" rx="36" ry="18"/><ellipse cx="520" cy="310" rx="38" ry="20"/><ellipse cx="300" cy="320" rx="30" ry="16"/><ellipse cx="410" cy="360" rx="36" ry="18"/></g>
+  </g>
+
+  <!-- tia nắng + bóng cửa sổ -->
+  <g filter="url(#soft)">
+    <polygon points="0,0 360,0 880,900 380,900" fill="url(#beam)"/>
+    <polygon points="380,0 620,0 1000,760 700,760" fill="url(#beam)" opacity=".4"/>
+  </g>
+  <g filter="url(#soft2)" opacity=".16" fill="#3a2619"><path d="M60 120h140v520H60zM240 120h140v520H240z"/></g>
+  <rect width="1200" height="900" fill="#ffcf8a" opacity=".07"/>
+</svg>

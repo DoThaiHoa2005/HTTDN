@@ -1,0 +1,1061 @@
+{
+  "info": {
+    "name": "Cafe CRM API - Do an HTTTDN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "customer_token",
+      "value": ""
+    },
+    {
+      "key": "manager_token",
+      "value": ""
+    },
+    {
+      "key": "customer_id",
+      "value": "1"
+    },
+    {
+      "key": "feedback_id",
+      "value": "1"
+    },
+    {
+      "key": "khao_sat_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Khach hang - Xac thuc",
+      "item": [
+        {
+          "name": "Dang ky",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Nguyen Van A\",\n  \"sdt\": \"0901234567\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"2000-05-10\",\n  \"so_thich\": \"ca phe sua\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/dang-ky",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "dang-ky"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dang nhap",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('customer_token', data.token);",
+                  "  pm.collectionVariables.set('customer_id', data.khachHang.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sdt\": \"0901234567\",\n  \"mat_khau\": \"MatKhau123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/dang-nhap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "dang-nhap"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem thong tin ca nhan",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/thong-tin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "thong-tin"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sua thong tin ca nhan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Nguyen Van A (da sua)\",\n  \"ngay_sinh\": \"2000-05-10\",\n  \"so_thich\": \"tra sua\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/thong-tin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "thong-tin"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Khach hang - Phan hoi",
+      "item": [
+        {
+          "name": "Gui phan hoi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"noi_dung\": \"Cafe rat ngon nhung hoi lau ban\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/phan-hoi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "phan-hoi"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem phan hoi cua toi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/phan-hoi/cua-toi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "phan-hoi",
+                "cua-toi"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Khach hang - Khao sat",
+      "item": [
+        {
+          "name": "Lay khao sat dang hoat dong",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/khao-sat/dang-hoat-dong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "khao-sat",
+                "dang-hoat-dong"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nop tra loi khao sat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cauTraLoi\": [\n    { \"cau_hoi_id\": 1, \"dap_an_id\": 1 },\n    { \"cau_hoi_id\": 2, \"gia_tri_so\": 4 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/khao-sat/tra-loi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "khao-sat",
+                "tra-loi"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Quan ly - Xac thuc",
+      "item": [
+        {
+          "name": "Dang nhap quan ly",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('manager_token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_dang_nhap\": \"admin\",\n  \"mat_khau\": \"MatKhau123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/dang-nhap",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "dang-nhap"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Quan ly - Khach hang",
+      "item": [
+        {
+          "name": "Danh sach khach hang",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang?trang_thai=hoat_dong",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang"
+              ],
+              "query": [
+                {
+                  "key": "trang_thai",
+                  "value": "hoat_dong"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Them khach hang",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Tran Thi B\",\n  \"sdt\": \"0909999999\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"1998-01-01\",\n  \"so_thich\": \"tra sua\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Khoa / mo khoa khach hang",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"khoa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}/trang-thai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "{{customer_id}}",
+                "trang-thai"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xoa khach hang",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "{{customer_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bao cao do tuoi va so thich",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/bao-cao",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "bao-cao"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Quan ly - Phan hoi",
+      "item": [
+        {
+          "name": "Danh sach phan hoi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/phan-hoi?trang_thai_xu_ly=cho_xu_ly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "phan-hoi"
+              ],
+              "query": [
+                {
+                  "key": "trang_thai_xu_ly",
+                  "value": "cho_xu_ly"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cap nhat trang thai phan hoi",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai_xu_ly\": \"da_xu_ly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/phan-hoi/{{feedback_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "phan-hoi",
+                "{{feedback_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Quan ly - Khao sat",
+      "item": [
+        {
+          "name": "Tao khao sat",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  pm.collectionVariables.set('khao_sat_id', data.khaoSatId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"Khao sat hai long thang 10\",\n  \"mo_ta\": \"Khao sat nhanh sau khi dung ca phe\",\n  \"cauHoi\": [\n    {\n      \"noi_dung_cau_hoi\": \"Ban thuong ghe quan vao khung gio nao?\",\n      \"loai_cau_hoi\": \"trac_nghiem\",\n      \"dapAn\": [\"Sang\", \"Trua\", \"Chieu\", \"Toi\"]\n    },\n    {\n      \"noi_dung_cau_hoi\": \"Ban hai long voi chat luong do uong o muc nao (1-5)?\",\n      \"loai_cau_hoi\": \"thang_do\"\n    },\n    {\n      \"noi_dung_cau_hoi\": \"Ban muon quan cai thien dieu gi?\",\n      \"loai_cau_hoi\": \"tu_luan\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Danh sach khao sat",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Thong ke khao sat",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat/{{khao_sat_id}}/thong-ke",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat",
+                "{{khao_sat_id}}",
+                "thong-ke"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Bo sung (nang cap CRM) - Khach hang",
+      "item": [
+        {
+          "name": "Doi mat khau (khach)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/doi-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "doi-mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mat_khau_cu\": \"matkhau123\",\n  \"mat_khau_moi\": \"matkhau456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Bo sung (nang cap CRM) - Quan ly",
+      "item": [
+        {
+          "name": "Tong quan (dashboard)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tong-quan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tong-quan"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Thong tin cua toi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/toi",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "toi"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Doi mat khau (quan ly)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/doi-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "doi-mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mat_khau_cu\": \"MatKhau123\",\n  \"mat_khau_moi\": \"MatKhau456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Chi tiet khach hang (ho so 360)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "{{customer_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sua khach hang + ghi chu noi bo",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "{{customer_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Nguyen Van A\",\n  \"sdt\": \"0901234567\",\n  \"ngay_sinh\": \"2000-05-20\",\n  \"so_thich\": \"Cà phê sữa\",\n  \"ghi_chu\": \"Khách quen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Danh sach khach hang (sap xep theo tuong tac)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang?sap_xep=tuong_tac&tim_kiem=an",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang"
+              ],
+              "query": [
+                {
+                  "key": "sap_xep",
+                  "value": "tuong_tac"
+                },
+                {
+                  "key": "tim_kiem",
+                  "value": "an"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tra loi phan hoi",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/phan-hoi/{{feedback_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "phan-hoi",
+                "{{feedback_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tra_loi\": \"Cảm ơn bạn đã góp ý!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Dong/mo khao sat",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat/{{khao_sat_id}}/trang-thai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat",
+                "{{khao_sat_id}}",
+                "trang-thai"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"da_dong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Xoa khao sat",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat/{{khao_sat_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat",
+                "{{khao_sat_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin dat lai mat khau tai khoan",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/2/mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "2",
+                "mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mat_khau_moi\": \"NhanVien456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
