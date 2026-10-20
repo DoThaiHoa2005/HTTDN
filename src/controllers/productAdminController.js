@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const pool = require('../config/db');
+const { DUNG_CLOUDINARY } = require('../middleware/uploadAnh');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
 
 const COT_SAP_XEP_HOP_LE = {
@@ -165,6 +166,26 @@ async function uploadAnhSanPham(req, res) {
   if (!req.file) {
     return res.status(400).json({ message: 'Không có file ảnh nào được gửi lên' });
   }
+
+  // Chạy trên Render: đẩy ảnh lên Cloudinary, trả về URL https vĩnh viễn
+  if (DUNG_CLOUDINARY) {
+    try {
+      const cloudinary = require('cloudinary').v2; // tự đọc biến môi trường CLOUDINARY_URL
+      const ketQua = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'cafe-crm/san-pham', resource_type: 'image' },
+          (err, result) => (err ? reject(err) : resolve(result))
+        );
+        stream.end(req.file.buffer);
+      });
+      return res.status(201).json({ url: ketQua.secure_url });
+    } catch (err) {
+      console.error('Lỗi upload Cloudinary:', err);
+      return res.status(500).json({ message: 'Không tải được ảnh lên Cloudinary, kiểm tra CLOUDINARY_URL' });
+    }
+  }
+
+  // Chạy trên máy cá nhân: lưu đĩa
   const url = `/uploads/san-pham/${req.file.filename}`;
   return res.status(201).json({ url });
 }

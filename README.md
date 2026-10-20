@@ -70,7 +70,7 @@ File `cafe-crm-postman-collection.json` chứa sẵn toàn bộ 17 request (khá
 **Import vào Thunder Client (VS Code)**: mở tab Thunder Client → Collections → nút menu (3 chấm) → Import → chọn file này
 
 Sau khi import:
-1. Chạy request **"Dang nhap"** (mục 1) hoặc **"Dang nhap quan ly"** (mục 4) trước — token trả về sẽ tự động lưu vào biến `customer_token` / `manager_token` của collection (nhờ script test có sẵn), không cần copy tay
+1. Chạy request **"Dang nhap"** (mục 1) hoặc **"Đăng nhập quản lý"** (mục 4) trước — token trả về sẽ tự động lưu vào biến `customer_token` / `manager_token` của collection (nhờ script test có sẵn), không cần copy tay
 2. Các request còn lại tự dùng `{{customer_token}}` / `{{manager_token}}` trong header Authorization
 3. Nếu đổi cổng chạy server, sửa biến `base_url` trong collection (mặc định `http://localhost:3000`)
 4. Vài request dùng biến `{{customer_id}}`, `{{feedback_id}}`, `{{khao_sat_id}}` — chỉnh giá trị này (trong tab Variables của collection) theo id thật trong CSDL của bạn

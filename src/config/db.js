@@ -9,7 +9,7 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: Number(process.env.DB_POOL_LIMIT) || 4, // gói DEV của Clever Cloud chỉ cho tối đa 5 kết nối cùng lúc
   queueLimit: 0,
 });
 
