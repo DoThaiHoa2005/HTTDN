@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
-const { kiemTraMatKhau } = require('../utils/kiemTra');
+const { kiemTraMatKhau, kiemTraChuoi } = require('../utils/kiemTra');
 
 // GET /api/quan-ly/tai-khoan - không trả về mat_khau
 // Chỉ admin mới thấy các tài khoản admin khác; quan_ly xem sẽ không thấy admin
@@ -13,7 +13,7 @@ async function danhSachTaiKhoan(req, res) {
 
     const [[{ tongSoBanGhi }]] = await pool.query(`SELECT COUNT(*) AS tongSoBanGhi FROM quanly${dieuKien}`);
     const [rows] = await pool.query(
-      `SELECT id, ten_dang_nhap, ho_ten, vai_tro, ngay_tao FROM quanly${dieuKien} ORDER BY ngay_tao ASC LIMIT ? OFFSET ?`,
+      `SELECT id, ten_dang_nhap, ho_ten, vai_tro, trang_thai, ngay_tao FROM quanly${dieuKien} ORDER BY ngay_tao ASC LIMIT ? OFFSET ?`,
       [moiTrang, offset]
     );
     return res.json(ketQuaPhanTrang(rows, tongSoBanGhi, trang, moiTrang));
@@ -36,6 +36,8 @@ async function themTaiKhoan(req, res) {
   }
   const loiMatKhau = kiemTraMatKhau(mat_khau);
   if (loiMatKhau) return res.status(400).json({ message: loiMatKhau });
+  const loiHoTen = kiemTraChuoi(ho_ten, { ten: 'Tên hiển thị', toiDa: 100 });
+  if (loiHoTen) return res.status(400).json({ message: loiHoTen });
   if (!['admin', 'quan_ly', 'nhan_vien'].includes(vai_tro)) {
     return res.status(400).json({ message: "vai_tro phải là 'admin', 'quan_ly' hoặc 'nhan_vien'" });
   }
@@ -131,6 +133,8 @@ async function xoaTaiKhoan(req, res) {
 // PATCH /api/quan-ly/tai-khoan/:id/ho-ten
 async function suaHoTenTaiKhoan(req, res) {
   const { ho_ten } = req.body;
+  const loiHoTen = kiemTraChuoi(ho_ten, { ten: 'Tên hiển thị', toiDa: 100 });
+  if (loiHoTen) return res.status(400).json({ message: loiHoTen });
   try {
     const [result] = await pool.query('UPDATE quanly SET ho_ten = ? WHERE id = ?', [ho_ten || null, req.params.id]);
     if (result.affectedRows === 0) {
@@ -163,7 +167,46 @@ async function datLaiMatKhauTaiKhoan(req, res) {
   }
 }
 
+// PATCH /api/quan-ly/tai-khoan/:id/trang-thai - khóa hoặc mở khóa tài khoản
+// body: { trang_thai: 'khoa' | 'hoat_dong' }
+async function doiTrangThaiTaiKhoan(req, res) {
+  const { trang_thai } = req.body;
+  const idMucTieu = Number(req.params.id);
+
+  if (!['khoa', 'hoat_dong'].includes(trang_thai)) {
+    return res.status(400).json({ message: "trang_thai phải là 'khoa' hoặc 'hoat_dong'" });
+  }
+  if (idMucTieu === req.quanLy.id && trang_thai === 'khoa') {
+    return res.status(400).json({ message: 'Không thể tự khóa tài khoản đang đăng nhập' });
+  }
+
+  try {
+    const [[mucTieu]] = await pool.query('SELECT id, vai_tro FROM quanly WHERE id = ?', [idMucTieu]);
+    if (!mucTieu) {
+      return res.status(404).json({ message: 'Không tìm thấy tài khoản' });
+    }
+
+    // Luôn phải còn ít nhất 1 admin đang hoạt động
+    if (trang_thai === 'khoa' && mucTieu.vai_tro === 'admin') {
+      const [[{ soAdminKhac }]] = await pool.query(
+        "SELECT COUNT(*) AS soAdminKhac FROM quanly WHERE vai_tro = 'admin' AND trang_thai = 'hoat_dong' AND id != ?",
+        [idMucTieu]
+      );
+      if (soAdminKhac < 1) {
+        return res.status(400).json({ message: 'Hệ thống phải còn ít nhất 1 tài khoản admin đang hoạt động' });
+      }
+    }
+
+    await pool.query('UPDATE quanly SET trang_thai = ? WHERE id = ?', [trang_thai, idMucTieu]);
+    return res.json({ message: trang_thai === 'khoa' ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+}
+
 module.exports = {
+  doiTrangThaiTaiKhoan,
   danhSachTaiKhoan,
   themTaiKhoan,
   phanQuyenTaiKhoan,

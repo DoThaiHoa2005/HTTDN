@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const pool = require('../config/db');
+const { kiemTraChuoi, kiemTraUrlAnh, likeChuoi } = require('../utils/kiemTra');
 const { DUNG_CLOUDINARY } = require('../middleware/uploadAnh');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
 
@@ -22,8 +23,13 @@ function xoaFileAnhCu(duongDan) {
 }
 
 // Kiểm tra dữ liệu sản phẩm, trả về chuỗi lỗi hoặc null
-function kiemTraSanPham({ ten_san_pham, gia, trang_thai }) {
+function kiemTraSanPham({ ten_san_pham, mo_ta, danh_muc, gia, hinh_anh, trang_thai }) {
   if (!ten_san_pham || !String(ten_san_pham).trim()) return 'Thiếu tên sản phẩm';
+  const loiChuoi = kiemTraChuoi(ten_san_pham, { ten: 'Tên sản phẩm', toiDa: 150, batBuoc: true })
+    || kiemTraChuoi(mo_ta, { ten: 'Mô tả', toiDa: 2000 })
+    || kiemTraChuoi(danh_muc, { ten: 'Danh mục', toiDa: 100 })
+    || kiemTraUrlAnh(hinh_anh);
+  if (loiChuoi) return loiChuoi;
   if (gia === undefined || gia === null || gia === '' || Number.isNaN(Number(gia)) || Number(gia) < 0) {
     return 'Giá sản phẩm không hợp lệ';
   }
@@ -45,7 +51,7 @@ async function danhSachSanPham(req, res) {
     // Tìm kiếm cơ bản: theo tên sản phẩm
     if (tim_kiem) {
       dieuKien += ' AND ten_san_pham LIKE ?';
-      thamSo.push(`%${tim_kiem}%`);
+      thamSo.push(likeChuoi(tim_kiem));
     }
 
     // Tìm kiếm nâng cao: kết hợp nhiều tiêu chí cùng lúc

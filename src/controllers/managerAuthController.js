@@ -8,7 +8,7 @@ const { kiemTraMatKhau } = require('../utils/kiemTra');
 async function dangNhapQuanLy(req, res) {
   const { ten_dang_nhap, mat_khau } = req.body;
 
-  if (!ten_dang_nhap || !mat_khau) {
+  if (!ten_dang_nhap || !mat_khau || typeof ten_dang_nhap !== 'string' || typeof mat_khau !== 'string') {
     return res.status(400).json({ message: 'Thiếu tên đăng nhập hoặc mật khẩu' });
   }
 
@@ -26,6 +26,10 @@ async function dangNhapQuanLy(req, res) {
     const khopMatKhau = await bcrypt.compare(mat_khau, quanLy.mat_khau);
     if (!khopMatKhau) {
       return res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không đúng' });
+    }
+
+    if (quanLy.trang_thai === 'khoa') {
+      return res.status(403).json({ message: 'Tài khoản đã bị khóa, vui lòng liên hệ admin để được hỗ trợ' });
     }
 
     const token = jwt.sign(
@@ -71,7 +75,7 @@ async function thongTinCuaToi(req, res) {
 async function doiMatKhauQuanLy(req, res) {
   const { mat_khau_cu, mat_khau_moi } = req.body;
 
-  if (!mat_khau_cu || !mat_khau_moi) {
+  if (!mat_khau_cu || !mat_khau_moi || typeof mat_khau_cu !== 'string') {
     return res.status(400).json({ message: 'Vui lòng nhập mật khẩu hiện tại và mật khẩu mới' });
   }
   const loiMatKhau = kiemTraMatKhau(mat_khau_moi);

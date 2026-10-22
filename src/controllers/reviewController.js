@@ -28,7 +28,7 @@ async function guiDanhGiaSanPham(req, res) {
   if (!san_pham_id || !Number.isInteger(Number(so_sao)) || so_sao < 1 || so_sao > 5) {
     return res.status(400).json({ message: 'Thiếu sản phẩm hoặc số sao không hợp lệ (1-5)' });
   }
-  if (nhan_xet && String(nhan_xet).length > 1000) {
+  if (nhan_xet && (typeof nhan_xet !== 'string' || nhan_xet.length > 1000)) {
     return res.status(400).json({ message: 'Nhận xét không được dài quá 1000 ký tự' });
   }
 
@@ -60,7 +60,7 @@ async function danhSachNhanVienDeDanhGia(req, res) {
               AVG(d.so_sao) AS diem_trung_binh, COUNT(d.id) AS so_luot_danh_gia
        FROM quanly q
        LEFT JOIN danhgianhanvien d ON d.quan_ly_id = q.id
-       WHERE q.vai_tro != 'admin'
+       WHERE q.vai_tro != 'admin' AND q.trang_thai = 'hoat_dong'
        GROUP BY q.id, ten_hien_thi
        ORDER BY ten_hien_thi ASC`
     );
@@ -84,13 +84,13 @@ async function guiDanhGiaNhanVien(req, res) {
   if (!quan_ly_id || !Number.isInteger(Number(so_sao)) || so_sao < 1 || so_sao > 5) {
     return res.status(400).json({ message: 'Thiếu nhân viên hoặc số sao không hợp lệ (1-5)' });
   }
-  if (nhan_xet && String(nhan_xet).length > 1000) {
+  if (nhan_xet && (typeof nhan_xet !== 'string' || nhan_xet.length > 1000)) {
     return res.status(400).json({ message: 'Nhận xét không được dài quá 1000 ký tự' });
   }
 
   try {
-    const [[quanLyMucTieu]] = await pool.query('SELECT vai_tro FROM quanly WHERE id = ?', [quan_ly_id]);
-    if (!quanLyMucTieu) {
+    const [[quanLyMucTieu]] = await pool.query('SELECT vai_tro, trang_thai FROM quanly WHERE id = ?', [quan_ly_id]);
+    if (!quanLyMucTieu || quanLyMucTieu.trang_thai === 'khoa') {
       return res.status(404).json({ message: 'Không tìm thấy nhân viên' });
     }
     if (quanLyMucTieu.vai_tro === 'admin') {

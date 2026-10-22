@@ -1,7 +1,8 @@
 {
   "info": {
-    "name": "Cafe CRM API - Do an HTTTDN",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "Cafe CRM API - Đồ án HTTTDN",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Bộ API kiểm thử hệ thống CRM quán cà phê.\n\nCÁCH DÙNG:\n1) Đặt biến base_url: http://localhost:3000 (chạy máy) hoặc https://ten-app.onrender.com (đã deploy).\n2) Chạy 'Đăng nhập' (thư mục 1) để lưu customer_token; chạy 'Đăng nhập quản lý' (thư mục 4) để lưu manager_token (tài khoản admin có quyền cao nhất).\n3) Các request còn lại tự gắn token. Thư mục 10-13 là các API sản phẩm, đánh giá, tài khoản & phân quyền (cần đăng nhập admin).\nMã lỗi: 400 dữ liệu sai, 401 chưa đăng nhập/token hết hạn/tài khoản bị khóa, 403 không đủ quyền, 404 không tìm thấy, 409 trùng dữ liệu, 429 thao tác quá nhanh, 500 lỗi máy chủ."
   },
   "variable": [
     {
@@ -18,7 +19,7 @@
     },
     {
       "key": "customer_id",
-      "value": "1"
+      "value": "2"
     },
     {
       "key": "feedback_id",
@@ -26,15 +27,31 @@
     },
     {
       "key": "khao_sat_id",
+      "value": "2"
+    },
+    {
+      "key": "product_id",
       "value": "1"
+    },
+    {
+      "key": "account_id",
+      "value": "3"
+    },
+    {
+      "key": "new_customer_id",
+      "value": "2"
+    },
+    {
+      "key": "sdt_moi",
+      "value": "0900000001"
     }
   ],
   "item": [
     {
-      "name": "1. Khach hang - Xac thuc",
+      "name": "1. Khách hàng - Xác thực",
       "item": [
         {
-          "name": "Dang ky",
+          "name": "Đăng ký",
           "request": {
             "method": "POST",
             "header": [
@@ -45,7 +62,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ho_ten\": \"Nguyen Van A\",\n  \"sdt\": \"0901234567\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"2000-05-10\",\n  \"so_thich\": \"ca phe sua\"\n}",
+              "raw": "{\n  \"ho_ten\": \"Nguyễn Văn Test\",\n  \"sdt\": \"0987654321\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"2000-05-10\",\n  \"so_thich\": \"Cà phê sữa\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -62,11 +79,12 @@
                 "auth",
                 "dang-ky"
               ]
-            }
+            },
+            "description": "Đăng ký tài khoản khách mới. Chạy lại lần 2 sẽ trả 409 (số đã đăng ký) - bình thường, cứ chạy tiếp 'Đăng nhập'."
           }
         },
         {
-          "name": "Dang nhap",
+          "name": "Đăng nhập",
           "event": [
             {
               "listen": "test",
@@ -76,6 +94,7 @@
                   "  const data = pm.response.json();",
                   "  pm.collectionVariables.set('customer_token', data.token);",
                   "  pm.collectionVariables.set('customer_id', data.khachHang.id);",
+                  "  try { const p = JSON.parse(atob(data.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); if (p.id) pm.collectionVariables.set('customer_id', p.id); } catch (e) {}",
                   "}"
                 ]
               }
@@ -91,7 +110,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"sdt\": \"0901234567\",\n  \"mat_khau\": \"MatKhau123\"\n}",
+              "raw": "{\n  \"sdt\": \"0987654321\",\n  \"mat_khau\": \"MatKhau123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -112,7 +131,7 @@
           }
         },
         {
-          "name": "Xem thong tin ca nhan",
+          "name": "Xem thông tin cá nhân",
           "request": {
             "method": "GET",
             "header": [
@@ -135,7 +154,7 @@
           }
         },
         {
-          "name": "Sua thong tin ca nhan",
+          "name": "Sửa thông tin cá nhân",
           "request": {
             "method": "PUT",
             "header": [
@@ -173,10 +192,10 @@
       ]
     },
     {
-      "name": "2. Khach hang - Phan hoi",
+      "name": "2. Khách hàng - Phản hồi",
       "item": [
         {
-          "name": "Gui phan hoi",
+          "name": "Gửi phản hồi",
           "request": {
             "method": "POST",
             "header": [
@@ -208,10 +227,24 @@
                 "phan-hoi"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const d = pm.response.json();",
+                  "  if (d.id) pm.collectionVariables.set('feedback_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Xem phan hoi cua toi",
+          "name": "Xem phản hồi của tôi",
           "request": {
             "method": "GET",
             "header": [
@@ -236,10 +269,10 @@
       ]
     },
     {
-      "name": "3. Khach hang - Khao sat",
+      "name": "3. Khách hàng - Khảo sát",
       "item": [
         {
-          "name": "Lay khao sat dang hoat dong",
+          "name": "Lấy khảo sát đang hoạt động",
           "request": {
             "method": "GET",
             "header": [
@@ -262,7 +295,7 @@
           }
         },
         {
-          "name": "Nop tra loi khao sat",
+          "name": "Nộp trả lời khảo sát",
           "request": {
             "method": "POST",
             "header": [
@@ -277,7 +310,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"cauTraLoi\": [\n    { \"cau_hoi_id\": 1, \"dap_an_id\": 1 },\n    { \"cau_hoi_id\": 2, \"gia_tri_so\": 4 }\n  ]\n}",
+              "raw": "{\n  \"cauTraLoi\": [\n    {\n      \"cau_hoi_id\": 3,\n      \"dap_an_id\": 5\n    },\n    {\n      \"cau_hoi_id\": 4,\n      \"gia_tri_so\": 4\n    },\n    {\n      \"cau_hoi_id\": 5,\n      \"cau_tra_loi\": \"Quán nên mở cửa sớm hơn\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -294,16 +327,17 @@
                 "khao-sat",
                 "tra-loi"
               ]
-            }
+            },
+            "description": "Dùng id câu hỏi/đáp án của khảo sát mẫu trong cafe-crm.sql (câu 3 trắc nghiệm, câu 4 thang đo 1-5, câu 5 tự luận). Nếu bạn tạo khảo sát khác, lấy id từ 'Lấy khảo sát đang hoạt động'."
           }
         }
       ]
     },
     {
-      "name": "4. Quan ly - Xac thuc",
+      "name": "4. Quản lý - Xác thực",
       "item": [
         {
-          "name": "Dang nhap quan ly",
+          "name": "Đăng nhập quản lý",
           "event": [
             {
               "listen": "test",
@@ -350,10 +384,10 @@
       ]
     },
     {
-      "name": "5. Quan ly - Khach hang",
+      "name": "5. Quản lý - Khách hàng",
       "item": [
         {
-          "name": "Danh sach khach hang",
+          "name": "Danh sách khách hàng",
           "request": {
             "method": "GET",
             "header": [
@@ -382,7 +416,7 @@
           }
         },
         {
-          "name": "Them khach hang",
+          "name": "Thêm khách hàng",
           "request": {
             "method": "POST",
             "header": [
@@ -397,7 +431,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ho_ten\": \"Tran Thi B\",\n  \"sdt\": \"0909999999\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"1998-01-01\",\n  \"so_thich\": \"tra sua\"\n}",
+              "raw": "{\n  \"ho_ten\": \"Tran Thi B\",\n  \"sdt\": \"{{sdt_moi}}\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ngay_sinh\": \"1998-01-01\",\n  \"so_thich\": \"tra sua\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -415,10 +449,21 @@
                 "khach-hang"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('new_customer_id', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
         },
         {
-          "name": "Khoa / mo khoa khach hang",
+          "name": "Khóa / mở khóa khách hàng",
           "request": {
             "method": "PATCH",
             "header": [
@@ -441,7 +486,7 @@
               }
             },
             "url": {
-              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}/trang-thai",
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{new_customer_id}}/trang-thai",
               "host": [
                 "{{base_url}}"
               ],
@@ -449,14 +494,14 @@
                 "api",
                 "quan-ly",
                 "khach-hang",
-                "{{customer_id}}",
+                "{{new_customer_id}}",
                 "trang-thai"
               ]
             }
           }
         },
         {
-          "name": "Xoa khach hang",
+          "name": "Xóa khách hàng",
           "request": {
             "method": "DELETE",
             "header": [
@@ -466,7 +511,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{customer_id}}",
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{new_customer_id}}",
               "host": [
                 "{{base_url}}"
               ],
@@ -474,13 +519,13 @@
                 "api",
                 "quan-ly",
                 "khach-hang",
-                "{{customer_id}}"
+                "{{new_customer_id}}"
               ]
             }
           }
         },
         {
-          "name": "Bao cao do tuoi va so thich",
+          "name": "Báo cáo độ tuổi và sở thích",
           "request": {
             "method": "GET",
             "header": [
@@ -506,10 +551,10 @@
       ]
     },
     {
-      "name": "6. Quan ly - Phan hoi",
+      "name": "6. Quản lý - Phản hồi",
       "item": [
         {
-          "name": "Danh sach phan hoi",
+          "name": "Danh sách phản hồi",
           "request": {
             "method": "GET",
             "header": [
@@ -538,7 +583,7 @@
           }
         },
         {
-          "name": "Cap nhat trang thai phan hoi",
+          "name": "Cập nhật trạng thái phản hồi",
           "request": {
             "method": "PATCH",
             "header": [
@@ -577,10 +622,10 @@
       ]
     },
     {
-      "name": "7. Quan ly - Khao sat",
+      "name": "7. Quản lý - Khảo sát",
       "item": [
         {
-          "name": "Tao khao sat",
+          "name": "Tạo khảo sát",
           "event": [
             {
               "listen": "test",
@@ -629,7 +674,7 @@
           }
         },
         {
-          "name": "Danh sach khao sat",
+          "name": "Danh sách khảo sát",
           "request": {
             "method": "GET",
             "header": [
@@ -652,7 +697,7 @@
           }
         },
         {
-          "name": "Thong ke khao sat",
+          "name": "Thống kê khảo sát",
           "request": {
             "method": "GET",
             "header": [
@@ -679,10 +724,10 @@
       ]
     },
     {
-      "name": "8. Bo sung (nang cap CRM) - Khach hang",
+      "name": "8. Bổ sung (nâng cấp CRM) - Khách hàng",
       "item": [
         {
-          "name": "Doi mat khau (khach)",
+          "name": "Đổi mật khẩu (khách)",
           "request": {
             "method": "PUT",
             "header": [
@@ -708,22 +753,60 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mat_khau_cu\": \"matkhau123\",\n  \"mat_khau_moi\": \"matkhau456\"\n}",
+              "raw": "{\n  \"mat_khau_cu\": \"MatKhau123\",\n  \"mat_khau_moi\": \"MatKhau456\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            }
+            },
+            "description": "Đổi MatKhau123 -> MatKhau456. Chạy ngay request kế tiếp để đổi lại, để lần sau 'Đăng nhập' vẫn dùng được."
+          }
+        },
+        {
+          "name": "Đổi lại mật khẩu về như cũ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/doi-mat-khau",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "doi-mat-khau"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mat_khau_cu\": \"MatKhau456\",\n  \"mat_khau_moi\": \"MatKhau123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Hoàn tác request trước."
           }
         }
       ]
     },
     {
-      "name": "9. Bo sung (nang cap CRM) - Quan ly",
+      "name": "9. Bổ sung (nâng cấp CRM) - Quản lý",
       "item": [
         {
-          "name": "Tong quan (dashboard)",
+          "name": "Tổng quan (dashboard)",
           "request": {
             "method": "GET",
             "header": [
@@ -750,7 +833,7 @@
           }
         },
         {
-          "name": "Thong tin cua toi",
+          "name": "Thông tin của tôi",
           "request": {
             "method": "GET",
             "header": [
@@ -777,7 +860,7 @@
           }
         },
         {
-          "name": "Doi mat khau (quan ly)",
+          "name": "Đổi mật khẩu (quản lý)",
           "request": {
             "method": "PUT",
             "header": [
@@ -813,7 +896,7 @@
           }
         },
         {
-          "name": "Chi tiet khach hang (ho so 360)",
+          "name": "Chi tiết khách hàng (hồ sơ 360)",
           "request": {
             "method": "GET",
             "header": [
@@ -841,7 +924,7 @@
           }
         },
         {
-          "name": "Sua khach hang + ghi chu noi bo",
+          "name": "Sửa khách hàng + ghi chú nội bộ",
           "request": {
             "method": "PUT",
             "header": [
@@ -868,17 +951,18 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"ho_ten\": \"Nguyen Van A\",\n  \"sdt\": \"0901234567\",\n  \"ngay_sinh\": \"2000-05-20\",\n  \"so_thich\": \"Cà phê sữa\",\n  \"ghi_chu\": \"Khách quen\"\n}",
+              "raw": "{\n  \"ho_ten\": \"Nguyễn Văn Test\",\n  \"sdt\": \"0987654321\",\n  \"ngay_sinh\": \"2000-05-20\",\n  \"so_thich\": \"Cà phê sữa\",\n  \"ghi_chu\": \"Khách quen, hay gọi cà phê sữa\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
                 }
               }
-            }
+            },
+            "description": "Sửa thông tin khách (customer_id là khách vừa đăng nhập ở thư mục 1) và ghi chú nội bộ."
           }
         },
         {
-          "name": "Danh sach khach hang (sap xep theo tuong tac)",
+          "name": "Danh sách khách hàng (sắp xếp theo tương tác)",
           "request": {
             "method": "GET",
             "header": [
@@ -915,7 +999,7 @@
           }
         },
         {
-          "name": "Tra loi phan hoi",
+          "name": "Trả lời phản hồi",
           "request": {
             "method": "PATCH",
             "header": [
@@ -952,7 +1036,7 @@
           }
         },
         {
-          "name": "Dong/mo khao sat",
+          "name": "Đóng/mở khảo sát",
           "request": {
             "method": "PATCH",
             "header": [
@@ -990,7 +1074,7 @@
           }
         },
         {
-          "name": "Xoa khao sat",
+          "name": "Xóa khảo sát",
           "request": {
             "method": "DELETE",
             "header": [
@@ -1018,7 +1102,7 @@
           }
         },
         {
-          "name": "Admin dat lai mat khau tai khoan",
+          "name": "Admin đặt lại mật khẩu tài khoản",
           "request": {
             "method": "PATCH",
             "header": [
@@ -1032,7 +1116,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/quan-ly/tai-khoan/2/mat-khau",
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}/mat-khau",
               "host": [
                 "{{base_url}}"
               ],
@@ -1040,7 +1124,7 @@
                 "api",
                 "quan-ly",
                 "tai-khoan",
-                "2",
+                "{{account_id}}",
                 "mat-khau"
               ]
             },
@@ -1052,6 +1136,779 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Khách hàng - Sản phẩm & Đánh giá",
+      "item": [
+        {
+          "name": "Xem thực đơn (công khai)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/san-pham?trang=1&moi_trang=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "san-pham"
+              ],
+              "query": [
+                {
+                  "key": "trang",
+                  "value": "1"
+                },
+                {
+                  "key": "moi_trang",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Không cần đăng nhập. Hỗ trợ tim_kiem, danh_muc, sap_xep, trang, moi_trang."
+          }
+        },
+        {
+          "name": "Danh mục thực đơn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/san-pham/danh-muc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "san-pham",
+                "danh-muc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Chi tiết sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/san-pham/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "san-pham",
+                "{{product_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Xem điểm đánh giá của sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/danh-gia/san-pham/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "danh-gia",
+                "san-pham",
+                "{{product_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Danh sách nhân viên để đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/danh-gia/nhan-vien",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "danh-gia",
+                "nhan-vien"
+              ]
+            },
+            "description": "Không hiển thị nhân viên đã bị khóa."
+          }
+        },
+        {
+          "name": "Gửi đánh giá sản phẩm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/danh-gia/san-pham",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "danh-gia",
+                "san-pham"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"san_pham_id\": 1,\n  \"so_sao\": 5,\n  \"nhan_xet\": \"Rất ngon!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Gửi đánh giá nhân viên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/danh-gia/nhan-vien",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "danh-gia",
+                "nhan-vien"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quan_ly_id\": 3,\n  \"so_sao\": 5,\n  \"nhan_xet\": \"Phục vụ nhiệt tình\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Quản lý - Sản phẩm (chỉ admin)",
+      "item": [
+        {
+          "name": "Danh sách sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham?trang=1&moi_trang=10&tim_kiem=",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham"
+              ],
+              "query": [
+                {
+                  "key": "trang",
+                  "value": "1"
+                },
+                {
+                  "key": "moi_trang",
+                  "value": "10"
+                },
+                {
+                  "key": "tim_kiem",
+                  "value": ""
+                }
+              ]
+            },
+            "description": "Lọc: tim_kiem, danh_muc, trang_thai, gia_tu, gia_den, sap_xep."
+          }
+        },
+        {
+          "name": "Danh sách danh mục",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham/danh-muc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham",
+                "danh-muc"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Thêm sản phẩm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_san_pham\": \"Cà phê muối\",\n  \"mo_ta\": \"Cà phê phin kem muối\",\n  \"danh_muc\": \"Cà phê\",\n  \"gia\": 35000,\n  \"hinh_anh\": \"https://res.cloudinary.com/ten-cloud/image/upload/anh.jpg\",\n  \"trang_thai\": \"dang_ban\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const d = pm.response.json();",
+                  "  if (d.id) pm.collectionVariables.set('product_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sửa sản phẩm",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham",
+                "{{product_id}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_san_pham\": \"Cà phê muối\",\n  \"mo_ta\": \"Đã cập nhật\",\n  \"danh_muc\": \"Cà phê\",\n  \"gia\": 38000,\n  \"trang_thai\": \"dang_ban\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Tải ảnh sản phẩm lên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham/upload-anh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham",
+                "upload-anh"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "anh",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "description": "Chọn file ảnh (JPG/PNG/WEBP, tối đa 5MB). Trả về { url } để điền vào hinh_anh khi thêm/sửa sản phẩm. Khi có CLOUDINARY_URL ảnh được lưu trên Cloudinary."
+          }
+        },
+        {
+          "name": "Xóa sản phẩm",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham/{{product_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham",
+                "{{product_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Quản lý - Tài khoản & phân quyền",
+      "item": [
+        {
+          "name": "Danh sách tài khoản",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan"
+              ]
+            },
+            "description": "Admin và Quản lý đều xem được; chỉ Admin được thêm/sửa/khóa/xóa."
+          }
+        },
+        {
+          "name": "Thêm tài khoản",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_dang_nhap\": \"nv_moi\",\n  \"mat_khau\": \"MatKhau123\",\n  \"ho_ten\": \"Nguyễn Văn An\",\n  \"vai_tro\": \"nhan_vien\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const d = pm.response.json();",
+                  "  if (d.id) pm.collectionVariables.set('account_id', d.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Phân quyền (đổi vai trò)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}/vai-tro",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "{{account_id}}",
+                "vai-tro"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vai_tro\": \"quan_ly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Khóa tài khoản",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}/trang-thai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "{{account_id}}",
+                "trang-thai"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"khoa\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Tài khoản bị khóa không đăng nhập được, token đang dùng mất hiệu lực ngay. Không thể tự khóa mình hoặc khóa admin cuối cùng."
+          }
+        },
+        {
+          "name": "Mở khóa tài khoản",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}/trang-thai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "{{account_id}}",
+                "trang-thai"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trang_thai\": \"hoat_dong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Sửa tên hiển thị",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}/ho-ten",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "{{account_id}}",
+                "ho-ten"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ho_ten\": \"Nguyễn Văn An (Pha chế)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Xóa tài khoản",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "{{account_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13. Quản lý - Xem đánh giá",
+      "item": [
+        {
+          "name": "Tổng hợp đánh giá sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/danh-gia/san-pham",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "danh-gia",
+                "san-pham"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nhận xét của một sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/danh-gia/san-pham/{{product_id}}/nhan-xet?trang=1&moi_trang=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "danh-gia",
+                "san-pham",
+                "{{product_id}}",
+                "nhan-xet"
+              ],
+              "query": [
+                {
+                  "key": "trang",
+                  "value": "1"
+                },
+                {
+                  "key": "moi_trang",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tổng hợp đánh giá nhân viên",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/danh-gia/nhan-vien",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "danh-gia",
+                "nhan-vien"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nhận xét của một nhân viên",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/danh-gia/nhan-vien/{{account_id}}/nhan-xet?trang=1&moi_trang=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "danh-gia",
+                "nhan-vien",
+                "{{account_id}}",
+                "nhan-xet"
+              ],
+              "query": [
+                {
+                  "key": "trang",
+                  "value": "1"
+                },
+                {
+                  "key": "moi_trang",
+                  "value": "10"
+                }
+              ]
             }
           }
         }

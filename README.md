@@ -5,7 +5,7 @@ Backend Node.js (Express + MySQL2) cho module CRM trong đồ án HTTTDN.
 ## Yêu cầu
 - Đã cài Node.js
 - Đã cài XAMPP và bật **MySQL** trong XAMPP Control Panel (chỉ dùng XAMPP cho CSDL; backend chạy bằng Node.js, không đặt trong `htdocs`)
-- Đã tạo CSDL `cafe_crm` (collation `utf8mb4_unicode_ci`) trong phpMyAdmin (`http://localhost/phpmyadmin`) và import file `../db/cafe_crm.sql` (tab Import)
+- Đã tạo CSDL `cafe_crm` (collation `utf8mb4_unicode_ci`) trong phpMyAdmin (`http://localhost/phpmyadmin`) và import file `../db/cafe-crm.sql` (tab Import)
 
 ## Cài đặt
 
@@ -142,7 +142,7 @@ Token khách hàng và token quản lý là 2 loại tách biệt (`loai: 'khach
 
 ## Khu vực Admin (mục II.2 đề bài)
 
-Bảng `sanpham` (kèm dữ liệu mẫu) đã có sẵn trong `db/cafe_crm.sql`. File `migration_them_bang_sanpham.sql` chỉ cần chạy qua phpMyAdmin nếu bạn đang dùng một CSDL cũ chưa có bảng này.
+Bảng `sanpham` (kèm dữ liệu mẫu) đã có sẵn trong `db/cafe-crm.sql`. File `migration_them_bang_sanpham.sql` chỉ cần chạy qua phpMyAdmin nếu bạn đang dùng một CSDL cũ chưa có bảng này.
 
 **Khu vực Admin tách biệt với khu vực CRM**: chỉ tài khoản có `vai_tro = 'admin'` mới gọi được các API bên dưới — tài khoản `vai_tro = 'nhan_vien'` sẽ nhận lỗi 403.
 
@@ -173,7 +173,7 @@ Bảng `sanpham` (kèm dữ liệu mẫu) đã có sẵn trong `db/cafe_crm.sql`
 
 ## Chức năng đánh giá sản phẩm & nhân viên
 
-Cột `quanly.ho_ten` (tên hiển thị cho khách hàng thấy) và 2 bảng `danhgiasanpham`, `danhgianhanvien` đã có sẵn trong `db/cafe_crm.sql`. File `migration_them_danh_gia.sql` chỉ cần chạy qua phpMyAdmin (sau `migration_them_bang_sanpham.sql`) nếu CSDL cũ chưa có các thành phần này.
+Cột `quanly.ho_ten` (tên hiển thị cho khách hàng thấy) và 2 bảng `danhgiasanpham`, `danhgianhanvien` đã có sẵn trong `db/cafe-crm.sql`. File `migration_them_danh_gia.sql` chỉ cần chạy qua phpMyAdmin (sau `migration_them_bang_sanpham.sql`) nếu CSDL cũ chưa có các thành phần này.
 
 | Method | Endpoint | Cần token | Mô tả |
 |---|---|---|---|

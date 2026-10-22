@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { likeChuoi } = require('../utils/kiemTra');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
 
 // GET /api/quan-ly/phan-hoi?trang_thai_xu_ly=cho_xu_ly&tim_kiem=...&trang=1&moi_trang=10
@@ -16,7 +17,7 @@ async function danhSachPhanHoi(req, res) {
     }
     if (tim_kiem) {
       dieuKien += ' AND (ph.noi_dung LIKE ? OR kh.ho_ten LIKE ? OR kh.sdt LIKE ?)';
-      thamSo.push(`%${tim_kiem}%`, `%${tim_kiem}%`, `%${tim_kiem}%`);
+      thamSo.push(likeChuoi(tim_kiem), likeChuoi(tim_kiem), likeChuoi(tim_kiem));
     }
 
     const [[{ tongSoBanGhi }]] = await pool.query(

@@ -20,6 +20,19 @@ async function coBang(bang) {
   return rows.length > 0;
 }
 
+async function themChiMucNeuThieu(bang, tenChiMuc, cacCot) {
+  if (!(await coBang(bang))) return;
+  const [rows] = await pool.query(
+    `SELECT 1 FROM information_schema.STATISTICS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND INDEX_NAME = ? LIMIT 1`,
+    [bang, tenChiMuc]
+  );
+  if (rows.length > 0) return;
+  const dsCot = cacCot.map((c) => `\`${c}\``).join(', ');
+  await pool.query(`ALTER TABLE \`${bang}\` ADD INDEX \`${tenChiMuc}\` (${dsCot})`);
+  console.log(`[schema] Đã thêm chỉ mục ${bang}.${tenChiMuc}`);
+}
+
 async function themCotNeuThieu(bang, cot, dinhNghia) {
   if (!(await coBang(bang))) return;
   if (await coCot(bang, cot)) return;
@@ -38,6 +51,20 @@ async function damBaoCauTruc() {
 
   // Khách hàng: ghi chú nội bộ của quán (khách không nhìn thấy)
   await themCotNeuThieu('khachhang', 'ghi_chu', 'TEXT NULL');
+
+  // Khóa/mở khóa tài khoản nhân sự (quản lý, nhân viên, admin)
+  await themCotNeuThieu('quanly', 'trang_thai', "ENUM('hoat_dong','khoa') NOT NULL DEFAULT 'hoat_dong'");
+
+  // Chỉ mục (index) cho các cột hay dùng để lọc, sắp xếp, thống kê
+  await themChiMucNeuThieu('phanhoi', 'idx_phanhoi_trangthai_ngay', ['trang_thai_xu_ly', 'ngay_gui']);
+  await themChiMucNeuThieu('khachhang', 'idx_khachhang_ngay_dang_ky', ['ngay_dang_ky']);
+  await themChiMucNeuThieu('khachhang', 'idx_khachhang_trang_thai', ['trang_thai']);
+  await themChiMucNeuThieu('sanpham', 'idx_sanpham_trang_thai', ['trang_thai']);
+  await themChiMucNeuThieu('danhgiasanpham', 'idx_dgsp_sp_ngay', ['san_pham_id', 'ngay_danh_gia']);
+  await themChiMucNeuThieu('danhgianhanvien', 'idx_dgnv_nv_ngay', ['quan_ly_id', 'ngay_danh_gia']);
+  await themChiMucNeuThieu('ketquakhaosat', 'idx_ketqua_ngay', ['ngay_thuc_hien']);
+  await themChiMucNeuThieu('khaosat', 'idx_khaosat_trangthai_ngay', ['trang_thai', 'ngay_tao']);
+  await themChiMucNeuThieu('quanly', 'idx_quanly_vaitro_trangthai', ['vai_tro', 'trang_thai']);
 
   // Sửa dấu tiếng Việt cho dữ liệu khảo sát mẫu (lỗi nhỏ không được làm server không khởi động được)
   try {
@@ -65,11 +92,11 @@ async function suaDauKhaoSatMau() {
 
   let soDong = 0;
   if (await coBang('khaosat')) {
-    for (const [cu, moi] of doiTieuDe) soDong += (await pool.query('UPDATE khaosat SET tieu_de = ? WHERE tieu_de = ?', [moi, cu]))[0].affectedRows;
-    for (const [cu, moi] of doiMoTa) soDong += (await pool.query('UPDATE khaosat SET mo_ta = ? WHERE mo_ta = ?', [moi, cu]))[0].affectedRows;
+    for (const [cu, moi] of doiTieuDe) soDong += (await pool.query('UPDATE khaosat SET tieu_de = ? WHERE BINARY tieu_de = ?', [moi, cu]))[0].affectedRows;
+    for (const [cu, moi] of doiMoTa) soDong += (await pool.query('UPDATE khaosat SET mo_ta = ? WHERE BINARY mo_ta = ?', [moi, cu]))[0].affectedRows;
   }
   if (await coBang('cauhoi')) {
-    for (const [cu, moi] of doiCauHoi) soDong += (await pool.query('UPDATE cauhoi SET noi_dung_cau_hoi = ? WHERE noi_dung_cau_hoi = ?', [moi, cu]))[0].affectedRows;
+    for (const [cu, moi] of doiCauHoi) soDong += (await pool.query('UPDATE cauhoi SET noi_dung_cau_hoi = ? WHERE BINARY noi_dung_cau_hoi = ?', [moi, cu]))[0].affectedRows;
   }
   // Đáp án chỉ đổi cho câu "khung giờ" (tránh đụng đáp án khác cũng tên "Sang"...)
   if ((await coBang('dapan')) && (await coBang('cauhoi'))) {
@@ -77,22 +104,22 @@ async function suaDauKhaoSatMau() {
       soDong += (await pool.query(
         `UPDATE dapan d JOIN cauhoi c ON c.id = d.cau_hoi_id
          SET d.noi_dung = ?
-         WHERE d.noi_dung = ? AND c.noi_dung_cau_hoi = 'Bạn thường ghé quán vào khung giờ nào?'`,
+         WHERE BINARY d.noi_dung = ? AND c.noi_dung_cau_hoi = 'Bạn thường ghé quán vào khung giờ nào?'`,
         [moi, cu]
       ))[0].affectedRows;
     }
   }
   // Dữ liệu mẫu khác của CSDL gốc (khách hàng, quản lý, phản hồi) cũng bị viết không dấu
   if (await coBang('khachhang')) {
-    soDong += (await pool.query("UPDATE khachhang SET ho_ten = 'Nguyễn Văn A (đã sửa)' WHERE ho_ten = 'Nguyen Van A (da sua)'"))[0].affectedRows;
-    soDong += (await pool.query("UPDATE khachhang SET ho_ten = 'Trần Thị B' WHERE ho_ten = 'Tran Thi B'"))[0].affectedRows;
-    soDong += (await pool.query("UPDATE khachhang SET so_thich = 'trà sữa' WHERE so_thich = 'tra sua'"))[0].affectedRows;
+    soDong += (await pool.query("UPDATE khachhang SET ho_ten = 'Nguyễn Văn A (đã sửa)' WHERE BINARY ho_ten = 'Nguyen Van A (da sua)'"))[0].affectedRows;
+    soDong += (await pool.query("UPDATE khachhang SET ho_ten = 'Trần Thị B' WHERE BINARY ho_ten = 'Tran Thi B'"))[0].affectedRows;
+    soDong += (await pool.query("UPDATE khachhang SET so_thich = 'trà sữa' WHERE BINARY so_thich = 'tra sua'"))[0].affectedRows;
   }
   if (await coBang('quanly')) {
-    soDong += (await pool.query("UPDATE quanly SET ho_ten = 'Quản lý' WHERE ho_ten = 'quan ly'"))[0].affectedRows;
+    soDong += (await pool.query("UPDATE quanly SET ho_ten = 'Quản lý' WHERE BINARY ho_ten = 'quan ly'"))[0].affectedRows;
   }
   if (await coBang('phanhoi')) {
-    soDong += (await pool.query("UPDATE phanhoi SET noi_dung = 'Cafe rất ngon nhưng hơi lâu' WHERE noi_dung = 'Cafe rat ngon nhung hoi lau ban'"))[0].affectedRows;
+    soDong += (await pool.query("UPDATE phanhoi SET noi_dung = 'Cafe rất ngon nhưng hơi lâu' WHERE BINARY noi_dung = 'Cafe rat ngon nhung hoi lau ban'"))[0].affectedRows;
   }
   if (soDong > 0) console.log(`[schema] Đã sửa dấu tiếng Việt cho ${soDong} dòng dữ liệu mẫu`);
 }

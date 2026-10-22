@@ -1,4 +1,5 @@
 const express = require('express');
+const { kiemTraIdThamSo } = require('../utils/kiemTra');
 const router = express.Router();
 const { xacThucQuanLy } = require('../middleware/authQuanLy');
 const { chiAdmin } = require('../middleware/chiAdmin');
@@ -37,6 +38,7 @@ const {
 } = require('../controllers/productAdminController');
 const {
   danhSachTaiKhoan,
+  doiTrangThaiTaiKhoan,
   themTaiKhoan,
   phanQuyenTaiKhoan,
   xoaTaiKhoan,
@@ -49,6 +51,8 @@ const {
   danhGiaNhanVien,
   nhanXetNhanVien,
 } = require('../controllers/reviewAdminController');
+
+router.param('id', kiemTraIdThamSo); // mọi :id phải là số nguyên dương
 
 // Đăng nhập - không cần token
 router.post('/dang-nhap', dangNhapQuanLy);
@@ -116,6 +120,7 @@ router.post('/san-pham/upload-anh', chiAdmin, (req, res, next) => {
 router.get('/tai-khoan', chiAdminHoacQuanLy, danhSachTaiKhoan);
 router.post('/tai-khoan', chiAdmin, themTaiKhoan);
 router.patch('/tai-khoan/:id/vai-tro', chiAdmin, phanQuyenTaiKhoan);
+router.patch('/tai-khoan/:id/trang-thai', chiAdmin, doiTrangThaiTaiKhoan);
 router.patch('/tai-khoan/:id/ho-ten', chiAdmin, suaHoTenTaiKhoan);
 router.patch('/tai-khoan/:id/mat-khau', chiAdmin, datLaiMatKhauTaiKhoan);
 router.delete('/tai-khoan/:id', chiAdmin, xoaTaiKhoan);

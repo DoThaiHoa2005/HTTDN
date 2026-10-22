@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
-const { chuanHoaSdt, sdtHopLe, kiemTraMatKhau, kiemTraNgaySinh } = require('../utils/kiemTra');
+const { chuanHoaSdt, sdtHopLe, kiemTraMatKhau, kiemTraNgaySinh, kiemTraChuoi, likeChuoi } = require('../utils/kiemTra');
 
 // Các biểu thức đếm tương tác của 1 khách hàng (dùng lại ở danh sách + chi tiết)
 const SQL_DEM_TUONG_TAC = `
@@ -33,7 +33,7 @@ async function danhSachKhachHang(req, res) {
     }
     if (tim_kiem) {
       dieuKien += ' AND (kh.ho_ten LIKE ? OR kh.sdt LIKE ?)';
-      thamSo.push(`%${tim_kiem}%`, `%${tim_kiem}%`);
+      thamSo.push(likeChuoi(tim_kiem), likeChuoi(tim_kiem));
     }
 
     const [[{ tongSoBanGhi }]] = await pool.query(
@@ -129,9 +129,12 @@ async function themKhachHang(req, res) {
   const { ho_ten, mat_khau, ngay_sinh, so_thich } = req.body;
   const sdt = chuanHoaSdt(req.body.sdt);
 
-  if (!ho_ten || !ho_ten.trim() || !sdt || !mat_khau) {
+  if (!ho_ten || !sdt || !mat_khau) {
     return res.status(400).json({ message: 'Thiếu họ tên, số điện thoại hoặc mật khẩu' });
   }
+  const loiDauVao = kiemTraChuoi(ho_ten, { ten: 'Họ tên', toiDa: 100, batBuoc: true })
+    || kiemTraChuoi(so_thich, { ten: 'Sở thích', toiDa: 100 });
+  if (loiDauVao) return res.status(400).json({ message: loiDauVao });
   if (!sdtHopLe(sdt)) {
     return res.status(400).json({ message: 'Số điện thoại không hợp lệ (cần 10 chữ số, bắt đầu bằng 0)' });
   }
@@ -167,9 +170,14 @@ async function suaKhachHang(req, res) {
   const { ho_ten, ngay_sinh, so_thich, ghi_chu } = req.body;
   const sdt = chuanHoaSdt(req.body.sdt);
 
-  if (!ho_ten || !ho_ten.trim() || !sdt) {
+  if (!ho_ten || !sdt) {
     return res.status(400).json({ message: 'Thiếu họ tên hoặc số điện thoại' });
   }
+  const loiDauVao = kiemTraChuoi(ho_ten, { ten: 'Họ tên', toiDa: 100, batBuoc: true })
+    || kiemTraChuoi(so_thich, { ten: 'Sở thích', toiDa: 100 });
+  if (loiDauVao) return res.status(400).json({ message: loiDauVao });
+  const loiGhiChu = kiemTraChuoi(ghi_chu, { ten: 'Ghi chú', toiDa: 2000 });
+  if (loiGhiChu) return res.status(400).json({ message: loiGhiChu });
   if (!sdtHopLe(sdt)) {
     return res.status(400).json({ message: 'Số điện thoại không hợp lệ (cần 10 chữ số, bắt đầu bằng 0)' });
   }

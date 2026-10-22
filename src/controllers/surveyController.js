@@ -56,7 +56,7 @@ async function layKhaoSatDangHoatDong(req, res) {
 async function nopTraLoiKhaoSat(req, res) {
   const { cauTraLoi } = req.body;
 
-  if (!Array.isArray(cauTraLoi) || cauTraLoi.length === 0) {
+  if (!Array.isArray(cauTraLoi) || cauTraLoi.length === 0 || cauTraLoi.length > 100 || cauTraLoi.some((c) => !c || typeof c !== 'object')) {
     return res.status(400).json({ message: 'Danh sách câu trả lời không hợp lệ' });
   }
 

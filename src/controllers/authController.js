@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-const { chuanHoaSdt, sdtHopLe, kiemTraMatKhau, kiemTraNgaySinh } = require('../utils/kiemTra');
+const { chuanHoaSdt, sdtHopLe, kiemTraMatKhau, kiemTraNgaySinh, kiemTraChuoi } = require('../utils/kiemTra');
 
 const SO_VONG_HASH = 10;
 
@@ -19,9 +19,12 @@ async function dangKy(req, res) {
   const { ho_ten, mat_khau, ngay_sinh, so_thich } = req.body;
   const sdt = chuanHoaSdt(req.body.sdt);
 
-  if (!ho_ten || !ho_ten.trim() || !sdt || !mat_khau) {
+  if (!ho_ten || !sdt || !mat_khau) {
     return res.status(400).json({ message: 'Thiếu họ tên, số điện thoại hoặc mật khẩu' });
   }
+  const loiDauVao = kiemTraChuoi(ho_ten, { ten: 'Họ tên', toiDa: 100, batBuoc: true })
+    || kiemTraChuoi(so_thich, { ten: 'Sở thích', toiDa: 100 });
+  if (loiDauVao) return res.status(400).json({ message: loiDauVao });
   if (!sdtHopLe(sdt)) {
     return res.status(400).json({ message: 'Số điện thoại không hợp lệ (cần 10 chữ số, bắt đầu bằng 0)' });
   }
@@ -63,7 +66,7 @@ async function dangNhap(req, res) {
   const { mat_khau } = req.body;
   const sdt = chuanHoaSdt(req.body.sdt);
 
-  if (!sdt || !mat_khau) {
+  if (!sdt || !mat_khau || typeof mat_khau !== 'string') {
     return res.status(400).json({ message: 'Thiếu số điện thoại hoặc mật khẩu' });
   }
 
@@ -142,9 +145,9 @@ async function layThongTin(req, res) {
 async function suaThongTin(req, res) {
   const { ho_ten, ngay_sinh, so_thich } = req.body;
 
-  if (!ho_ten || !ho_ten.trim()) {
-    return res.status(400).json({ message: 'Họ tên không được để trống' });
-  }
+  const loiDauVao = kiemTraChuoi(ho_ten, { ten: 'Họ tên', toiDa: 100, batBuoc: true })
+    || kiemTraChuoi(so_thich, { ten: 'Sở thích', toiDa: 100 });
+  if (loiDauVao) return res.status(400).json({ message: loiDauVao });
   const loiNgaySinh = kiemTraNgaySinh(ngay_sinh);
   if (loiNgaySinh) return res.status(400).json({ message: loiNgaySinh });
 
@@ -165,7 +168,7 @@ async function suaThongTin(req, res) {
 async function doiMatKhau(req, res) {
   const { mat_khau_cu, mat_khau_moi } = req.body;
 
-  if (!mat_khau_cu || !mat_khau_moi) {
+  if (!mat_khau_cu || !mat_khau_moi || typeof mat_khau_cu !== 'string') {
     return res.status(400).json({ message: 'Vui lòng nhập mật khẩu hiện tại và mật khẩu mới' });
   }
   const loiMatKhau = kiemTraMatKhau(mat_khau_moi);

@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { thamSoPhanTrang } = require('../utils/phanTrang');
 
 const DO_DAI_PHAN_HOI_TOI_DA = 1000;
 
@@ -7,7 +8,7 @@ const DO_DAI_PHAN_HOI_TOI_DA = 1000;
 async function guiPhanHoi(req, res) {
   const { noi_dung } = req.body;
 
-  if (!noi_dung || noi_dung.trim() === '') {
+  if (typeof noi_dung !== 'string' || noi_dung.trim() === '') {
     return res.status(400).json({ message: 'Nội dung phản hồi không được để trống' });
   }
   if (noi_dung.trim().length > DO_DAI_PHAN_HOI_TOI_DA) {
@@ -31,11 +32,13 @@ async function guiPhanHoi(req, res) {
 
 // GET /api/phan-hoi/cua-toi (yêu cầu token khách hàng) - xem lại phản hồi đã gửi + câu trả lời của quán
 async function xemPhanHoiCuaToi(req, res) {
+  // Mặc định 50 phản hồi mới nhất, có thể phân trang bằng ?trang=&moi_trang= (vẫn trả về mảng như cũ)
+  const { moiTrang, offset } = thamSoPhanTrang(req, 50);
   try {
     const [rows] = await pool.query(
       `SELECT id, noi_dung, ngay_gui, trang_thai_xu_ly, tra_loi, ngay_tra_loi
-       FROM phanhoi WHERE khach_hang_id = ? ORDER BY ngay_gui DESC`,
-      [req.khachHang.id]
+       FROM phanhoi WHERE khach_hang_id = ? ORDER BY ngay_gui DESC LIMIT ? OFFSET ?`,
+      [req.khachHang.id, moiTrang, offset]
     );
     return res.json(rows);
   } catch (err) {

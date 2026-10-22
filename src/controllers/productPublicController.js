@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { likeChuoi } = require('../utils/kiemTra');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
 
 // GET /api/san-pham - công khai, ai cũng xem được, chỉ trả sản phẩm đang bán
@@ -24,7 +25,7 @@ async function danhSachSanPhamCongKhai(req, res) {
     }
     if (tim_kiem) {
       dieuKien += ' AND sp.ten_san_pham LIKE ?';
-      thamSo.push(`%${tim_kiem}%`);
+      thamSo.push(likeChuoi(tim_kiem));
     }
 
     const [[{ tongSoBanGhi }]] = await pool.query(

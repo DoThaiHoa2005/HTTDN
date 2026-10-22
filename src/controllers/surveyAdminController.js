@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { kiemTraChuoi } = require('../utils/kiemTra');
 const { thamSoPhanTrang, ketQuaPhanTrang } = require('../utils/phanTrang');
 
 const LOAI_CAU_HOI_HOP_LE = ['trac_nghiem', 'thang_do', 'tu_luan'];
@@ -15,12 +16,21 @@ const LOAI_CAU_HOI_HOP_LE = ['trac_nghiem', 'thang_do', 'tu_luan'];
 async function taoKhaoSat(req, res) {
   const { tieu_de, mo_ta, cauHoi } = req.body;
 
-  if (!tieu_de || !tieu_de.trim() || !Array.isArray(cauHoi) || cauHoi.length === 0) {
+  if (!tieu_de || !Array.isArray(cauHoi) || cauHoi.length === 0) {
     return res.status(400).json({ message: 'Thiếu tiêu đề hoặc danh sách câu hỏi' });
   }
+  const loiTieuDe = kiemTraChuoi(tieu_de, { ten: 'Tiêu đề', toiDa: 200, batBuoc: true }) || kiemTraChuoi(mo_ta, { ten: 'Mô tả', toiDa: 2000 });
+  if (loiTieuDe) return res.status(400).json({ message: loiTieuDe });
+  if (cauHoi.length > 50) return res.status(400).json({ message: 'Một khảo sát tối đa 50 câu hỏi' });
 
   // Kiểm tra toàn bộ câu hỏi trước khi ghi DB
   for (const ch of cauHoi) {
+    if (!ch || typeof ch !== 'object' || typeof ch.noi_dung_cau_hoi !== 'string' || ch.noi_dung_cau_hoi.length > 1000) {
+      return res.status(400).json({ message: 'Nội dung câu hỏi không hợp lệ (tối đa 1000 ký tự)' });
+    }
+    if (ch.dapAn !== undefined && (!Array.isArray(ch.dapAn) || ch.dapAn.length > 20 || ch.dapAn.some((d) => typeof d !== 'string' || d.length > 255))) {
+      return res.status(400).json({ message: 'Đáp án không hợp lệ (tối đa 20 đáp án, mỗi đáp án 255 ký tự)' });
+    }
     if (!ch.noi_dung_cau_hoi || !String(ch.noi_dung_cau_hoi).trim() || !LOAI_CAU_HOI_HOP_LE.includes(ch.loai_cau_hoi)) {
       return res.status(400).json({ message: 'Mỗi câu hỏi cần có nội dung và loại câu hỏi hợp lệ' });
     }

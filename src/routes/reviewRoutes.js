@@ -1,4 +1,5 @@
 const express = require('express');
+const { kiemTraIdThamSo } = require('../utils/kiemTra');
 const router = express.Router();
 const { xacThucKhachHang } = require('../middleware/auth');
 const {
@@ -9,6 +10,8 @@ const {
 } = require('../controllers/reviewController');
 
 // Công khai - ai cũng xem được điểm trung bình
+router.param('id', kiemTraIdThamSo); // mọi :id phải là số nguyên dương
+
 router.get('/san-pham/:id', xemDanhGiaSanPham);
 router.get('/nhan-vien', danhSachNhanVienDeDanhGia);
 

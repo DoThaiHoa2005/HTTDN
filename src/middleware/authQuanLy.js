@@ -25,11 +25,14 @@ async function xacThucQuanLy(req, res, next) {
 
   try {
     const [[ql]] = await pool.query(
-      'SELECT id, ten_dang_nhap, vai_tro FROM quanly WHERE id = ?',
+      'SELECT id, ten_dang_nhap, vai_tro, trang_thai FROM quanly WHERE id = ?',
       [payload.id]
     );
     if (!ql) {
       return res.status(401).json({ message: 'Tài khoản không còn tồn tại' });
+    }
+    if (ql.trang_thai === 'khoa') {
+      return res.status(401).json({ message: 'Tài khoản đã bị khóa, vui lòng liên hệ admin để được hỗ trợ' });
     }
     req.quanLy = { id: ql.id, ten_dang_nhap: ql.ten_dang_nhap, vai_tro: ql.vai_tro, loai: 'quan_ly' };
     next();

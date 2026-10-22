@@ -39,7 +39,45 @@ function kiemTraNgaySinh(ngaySinh) {
   return null;
 }
 
+// Kiểm tra một trường chữ: đúng kiểu (chuỗi), không rỗng nếu bắt buộc, không quá dài.
+// Trả về chuỗi lỗi hoặc null. Chặn các kiểu dữ liệu lạ (số, mảng, object) mà client độc hại có thể gửi.
+function kiemTraChuoi(giaTri, { ten, toiDa, batBuoc = false }) {
+  if (giaTri === undefined || giaTri === null || giaTri === '') {
+    return batBuoc ? `${ten} không được để trống` : null;
+  }
+  if (typeof giaTri !== 'string') return `${ten} không hợp lệ`;
+  if (batBuoc && !giaTri.trim()) return `${ten} không được để trống`;
+  if (giaTri.trim().length > toiDa) return `${ten} không được dài quá ${toiDa} ký tự`;
+  return null;
+}
+
+// Địa chỉ ảnh sản phẩm: chỉ chấp nhận đường dẫn upload nội bộ hoặc URL http(s) (chặn javascript:, data: ...)
+function kiemTraUrlAnh(url) {
+  if (url === undefined || url === null || url === '') return null;
+  if (typeof url !== 'string' || url.length > 255) return 'Địa chỉ ảnh không hợp lệ hoặc quá dài (tối đa 255 ký tự)';
+  const hopLe = (url.startsWith('/uploads/') && !url.includes('..')) || /^https?:\/\/[^\s<>"']+$/i.test(url);
+  return hopLe ? null : 'Địa chỉ ảnh phải là đường dẫn tải lên hoặc link bắt đầu bằng http:// hoặc https://';
+}
+
+// Chuẩn bị từ khóa cho LIKE: cắt độ dài và escape ký tự đặc biệt % _ \
+function likeChuoi(tuKhoa) {
+  const s = String(tuKhoa || '').trim().slice(0, 100).replace(/[\\%_]/g, '\\$&');
+  return `%${s}%`;
+}
+
+// Dùng với router.param('id', kiemTraIdThamSo): id trên đường dẫn phải là số nguyên dương
+function kiemTraIdThamSo(req, res, next, giaTri) {
+  if (!/^\d{1,10}$/.test(giaTri) || Number(giaTri) < 1) {
+    return res.status(400).json({ message: 'Mã (id) không hợp lệ' });
+  }
+  next();
+}
+
 module.exports = {
+  kiemTraChuoi,
+  kiemTraUrlAnh,
+  likeChuoi,
+  kiemTraIdThamSo,
   chuanHoaSdt,
   sdtHopLe,
   kiemTraMatKhau,
