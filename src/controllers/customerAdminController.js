@@ -204,20 +204,6 @@ async function suaKhachHang(req, res) {
   }
 }
 
-// DELETE /api/quan-ly/khach-hang/:id
-async function xoaKhachHang(req, res) {
-  try {
-    const [result] = await pool.query('DELETE FROM khachhang WHERE id = ?', [req.params.id]);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Không tìm thấy khách hàng' });
-    }
-    return res.json({ message: 'Xóa khách hàng thành công' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Lỗi máy chủ' });
-  }
-}
-
 // PATCH /api/quan-ly/khach-hang/:id/trang-thai
 // body: { trang_thai: 'khoa' | 'hoat_dong' }
 async function doiTrangThaiKhachHang(req, res) {
@@ -256,8 +242,7 @@ function tinhTuoi(ngaySinh) {
 
 // GET /api/quan-ly/khach-hang/bao-cao
 // Báo cáo tỷ lệ độ tuổi + sở thích + tăng trưởng khách hàng theo tháng
-async function baoCaoKhachHang(req, res) {
-  try {
+async function tinhBaoCao() {
     const [rows] = await pool.query(
       `SELECT ngay_sinh, so_thich FROM khachhang WHERE trang_thai = 'hoat_dong'`
     );
@@ -303,7 +288,7 @@ async function baoCaoKhachHang(req, res) {
        FROM khachhang`
     );
 
-    return res.json({
+    return {
       tongSoKhachHang: rows.length,
       tongTatCa: tong.tat_ca,
       soKhachDaKhoa: Number(tong.da_khoa || 0),
@@ -311,7 +296,12 @@ async function baoCaoKhachHang(req, res) {
       theoDoTuoi: nhomTuoi,
       theoSoThich: nhomSoThich,
       theoThang,
-    });
+    };
+}
+
+async function baoCaoKhachHang(req, res) {
+  try {
+    return res.json(await tinhBaoCao());
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: 'Lỗi máy chủ khi tạo báo cáo' });
@@ -319,11 +309,13 @@ async function baoCaoKhachHang(req, res) {
 }
 
 module.exports = {
+  SQL_DEM_TUONG_TAC,
+  SAP_XEP_HOP_LE,
+  tinhBaoCao,
   danhSachKhachHang,
   chiTietKhachHang,
   themKhachHang,
   suaKhachHang,
-  xoaKhachHang,
   doiTrangThaiKhachHang,
   baoCaoKhachHang,
 };

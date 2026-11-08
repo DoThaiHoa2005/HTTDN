@@ -501,30 +501,6 @@
           }
         },
         {
-          "name": "Xóa khách hàng",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{manager_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/quan-ly/khach-hang/{{new_customer_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "quan-ly",
-                "khach-hang",
-                "{{new_customer_id}}"
-              ]
-            }
-          }
-        },
-        {
           "name": "Báo cáo độ tuổi và sở thích",
           "request": {
             "method": "GET",
@@ -1557,7 +1533,7 @@
                 "tai-khoan"
               ]
             },
-            "description": "Admin và Quản lý đều xem được; chỉ Admin được thêm/sửa/khóa/xóa."
+            "description": "Admin và Quản lý đều xem được; chỉ Admin được thêm, sửa, phân quyền, khóa/mở khóa. Hệ thống không cho xóa tài khoản."
           }
         },
         {
@@ -1762,30 +1738,6 @@
               }
             }
           }
-        },
-        {
-          "name": "Xóa tài khoản",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{manager_token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/quan-ly/tai-khoan/{{account_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "quan-ly",
-                "tai-khoan",
-                "{{account_id}}"
-              ]
-            }
-          }
         }
       ]
     },
@@ -1910,6 +1862,200 @@
                 }
               ]
             }
+          }
+        }
+      ]
+    },
+    {
+      "name": "14. Quản lý - Xuất Excel",
+      "item": [
+        {
+          "name": "Xuất danh sách khách hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/xuat-excel?sap_xep=moi_nhat",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "xuat-excel"
+              ],
+              "query": [
+                {
+                  "key": "sap_xep",
+                  "value": "moi_nhat"
+                }
+              ]
+            },
+            "description": "Admin, Quản lý. Lọc: trang_thai (hoat_dong/khoa), tim_kiem, sap_xep (moi_nhat/cu_nhat/ten_az/tuong_tac). Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
+          }
+        },
+        {
+          "name": "Xuất báo cáo khách hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khach-hang/bao-cao/xuat-excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khach-hang",
+                "bao-cao",
+                "xuat-excel"
+              ]
+            },
+            "description": "Admin, Quản lý. 4 sheet: Tổng quan, Theo độ tuổi, Theo sở thích, Khách mới theo tháng. Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
+          }
+        },
+        {
+          "name": "Xuất danh sách phản hồi",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/phan-hoi/xuat-excel?trang_thai_xu_ly=da_xu_ly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "phan-hoi",
+                "xuat-excel"
+              ],
+              "query": [
+                {
+                  "key": "trang_thai_xu_ly",
+                  "value": "da_xu_ly"
+                }
+              ]
+            },
+            "description": "Admin, Quản lý. Lọc: trang_thai_xu_ly (cho_xu_ly/da_xu_ly), tim_kiem. Có thời gian phản hồi (giờ) và sheet Tóm tắt. Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
+          }
+        },
+        {
+          "name": "Xuất thống kê khảo sát",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/khao-sat/2/xuat-excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "khao-sat",
+                "2",
+                "xuat-excel"
+              ]
+            },
+            "description": "Admin, Quản lý. Mặc định xuất khảo sát mẫu có id = 2 (đổi số 2 trong đường dẫn để xuất khảo sát khác). 3 sheet: Tổng quan, Thống kê câu hỏi, Chi tiết trả lời của từng khách. Bấm 'Send and Download' để lưu file .xlsx."
+          }
+        },
+        {
+          "name": "Xuất tổng hợp đánh giá",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/danh-gia/xuat-excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "danh-gia",
+                "xuat-excel"
+              ]
+            },
+            "description": "Admin, Quản lý. 4 sheet: Tổng hợp món, Tổng hợp nhân viên, Nhận xét món, Nhận xét nhân viên. Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
+          }
+        },
+        {
+          "name": "Xuất danh sách sản phẩm",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/san-pham/xuat-excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "san-pham",
+                "xuat-excel"
+              ]
+            },
+            "description": "Chỉ Admin. Lọc: tim_kiem, danh_muc, trang_thai (dang_ban/ngung_ban), gia_tu, gia_den. Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
+          }
+        },
+        {
+          "name": "Xuất danh sách tài khoản nhân sự",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quan-ly/tai-khoan/xuat-excel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quan-ly",
+                "tai-khoan",
+                "xuat-excel"
+              ]
+            },
+            "description": "Chỉ Admin. Không bao gồm mật khẩu. Bấm 'Send and Download' để lưu file .xlsx. Dùng đúng bộ lọc của trang danh sách, xuất toàn bộ kết quả (tối đa 20.000 dòng)."
           }
         }
       ]

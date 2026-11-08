@@ -105,7 +105,7 @@ Authorization: Bearer <token nhận được sau khi quản lý đăng nhập>
 | POST | /api/quan-ly/dang-nhap | Đăng nhập quản lý, trả về token |
 | GET | /api/quan-ly/khach-hang | Danh sách khách hàng (lọc theo `trang_thai`, tìm theo `tim_kiem`) |
 | POST | /api/quan-ly/khach-hang | Thêm khách hàng mới |
-| DELETE | /api/quan-ly/khach-hang/:id | Xóa khách hàng |
+| DELETE | /api/quan-ly/khach-hang/:id | Không hỗ trợ (trả 405) — dùng PATCH .../trang-thai để khóa khách hàng |
 | PATCH | /api/quan-ly/khach-hang/:id/trang-thai | Khóa/mở khóa tài khoản khách hàng |
 | GET | /api/quan-ly/khach-hang/bao-cao | Báo cáo tỷ lệ độ tuổi và sở thích |
 | GET | /api/quan-ly/phan-hoi | Danh sách phản hồi (lọc theo `trang_thai_xu_ly`) |
@@ -162,7 +162,7 @@ Bảng `sanpham` (kèm dữ liệu mẫu) đã có sẵn trong `db/cafe-crm.sql`
 | POST | /api/quan-ly/tai-khoan | Thêm tài khoản quản lý mới (có thể kèm `ho_ten` hiển thị) |
 | PATCH | /api/quan-ly/tai-khoan/:id/vai-tro | Phân quyền (đổi `admin` ⇄ `nhan_vien`) |
 | PATCH | /api/quan-ly/tai-khoan/:id/ho-ten | Sửa họ tên hiển thị cho tài khoản |
-| DELETE | /api/quan-ly/tai-khoan/:id | Xóa tài khoản quản lý |
+| PATCH | /api/quan-ly/tai-khoan/:id/trang-thai | Khóa / mở khóa tài khoản (không hỗ trợ xóa tài khoản, DELETE trả 405) |
 
 ### Query hỗ trợ tìm kiếm nâng cao cho `GET /api/quan-ly/san-pham`
 `tim_kiem` (theo tên), `danh_muc`, `trang_thai` (`dang_ban`/`ngung_ban`), `gia_tu`, `gia_den`, `sap_xep` (`gia_tang`/`gia_giam`/`ten_az`/`ten_za`/`moi_nhat`/`cu_nhat`) — có thể kết hợp nhiều tham số cùng lúc.
@@ -234,3 +234,19 @@ Response đổi từ mảng thuần sang dạng:
 ## Việc cần làm tiếp
 - Viết validate input kỹ hơn (định dạng số điện thoại, độ dài mật khẩu tối thiểu...)
 - Cân nhắc thêm phân trang (pagination) cho danh sách khách hàng/phản hồi khi dữ liệu lớn
+
+## Xuất Excel (.xlsx)
+
+Các API dưới đây trả về file Excel đã định dạng sẵn (tiêu đề, bộ lọc đang chọn, đóng băng dòng đầu, bộ lọc cột, định dạng ngày/tiền, màu trạng thái, dòng tổng, thiết lập in A4). Danh sách xuất **toàn bộ kết quả** theo bộ lọc của trang tương ứng (tối đa 20.000 dòng), không bị giới hạn theo trang.
+
+| Method | Endpoint | Quyền | Nội dung file |
+|---|---|---|---|
+| GET | /api/quan-ly/khach-hang/xuat-excel | Admin, Quản lý | Danh sách khách hàng + sheet Tóm tắt |
+| GET | /api/quan-ly/khach-hang/bao-cao/xuat-excel | Admin, Quản lý | Báo cáo theo độ tuổi, sở thích, tháng |
+| GET | /api/quan-ly/phan-hoi/xuat-excel | Admin, Quản lý | Phản hồi + câu trả lời + thời gian phản hồi |
+| GET | /api/quan-ly/khao-sat/:id/xuat-excel | Admin, Quản lý | Tổng quan, thống kê câu hỏi, chi tiết trả lời |
+| GET | /api/quan-ly/danh-gia/xuat-excel | Admin, Quản lý | Tổng hợp và nhận xét món/nhân viên |
+| GET | /api/quan-ly/san-pham/xuat-excel | Admin | Thực đơn + sheet Tóm tắt |
+| GET | /api/quan-ly/tai-khoan/xuat-excel | Admin | Tài khoản nhân sự (không có mật khẩu) |
+
+Trên giao diện, bấm nút **Xuất Excel** ở góc phải tiêu đề mỗi trang.

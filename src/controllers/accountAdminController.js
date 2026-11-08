@@ -99,37 +99,6 @@ async function phanQuyenTaiKhoan(req, res) {
   }
 }
 
-// DELETE /api/quan-ly/tai-khoan/:id
-async function xoaTaiKhoan(req, res) {
-  const idMucTieu = Number(req.params.id);
-
-  if (idMucTieu === req.quanLy.id) {
-    return res.status(400).json({ message: 'Không thể tự xóa tài khoản đang đăng nhập' });
-  }
-
-  try {
-    const [[taiKhoanMucTieu]] = await pool.query('SELECT vai_tro FROM quanly WHERE id = ?', [idMucTieu]);
-    if (!taiKhoanMucTieu) {
-      return res.status(404).json({ message: 'Không tìm thấy tài khoản' });
-    }
-
-    if (taiKhoanMucTieu.vai_tro === 'admin') {
-      const [[{ soAdmin }]] = await pool.query(
-        "SELECT COUNT(*) AS soAdmin FROM quanly WHERE vai_tro = 'admin'"
-      );
-      if (soAdmin <= 1) {
-        return res.status(400).json({ message: 'Hệ thống phải còn ít nhất 1 tài khoản admin' });
-      }
-    }
-
-    await pool.query('DELETE FROM quanly WHERE id = ?', [idMucTieu]);
-    return res.json({ message: 'Xóa tài khoản thành công' });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: 'Lỗi máy chủ' });
-  }
-}
-
 // PATCH /api/quan-ly/tai-khoan/:id/ho-ten
 async function suaHoTenTaiKhoan(req, res) {
   const { ho_ten } = req.body;
@@ -210,7 +179,6 @@ module.exports = {
   danhSachTaiKhoan,
   themTaiKhoan,
   phanQuyenTaiKhoan,
-  xoaTaiKhoan,
   suaHoTenTaiKhoan,
   datLaiMatKhauTaiKhoan,
 };

@@ -39,7 +39,8 @@ app.use(helmet({
 // CORS: đặt CORS_ORIGIN (vd: https://ten-app.onrender.com, nhiều giá trị cách nhau dấu phẩy) để chỉ cho phép các domain đó.
 // Khi frontend và backend cùng domain (cách triển khai hiện tại) thì không cần đặt.
 const nguonChoPhep = (process.env.CORS_ORIGIN || '').split(',').map((x) => x.trim()).filter(Boolean);
-app.use(cors(nguonChoPhep.length ? { origin: nguonChoPhep } : undefined));
+// Cho phép trình duyệt đọc tên file và số dòng khi tải file Excel (khi frontend chạy khác cổng)
+app.use(cors({ ...(nguonChoPhep.length ? { origin: nguonChoPhep } : {}), exposedHeaders: ['Content-Disposition', 'X-Tong-So-Dong'] }));
 
 app.use(express.json({ limit: '100kb' }));
 

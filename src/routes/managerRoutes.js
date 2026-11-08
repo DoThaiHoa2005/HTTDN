@@ -1,5 +1,8 @@
 const express = require('express');
 const { kiemTraIdThamSo } = require('../utils/kiemTra');
+const {
+  xuatKhachHang, xuatPhanHoi, xuatBaoCaoKhachHang, xuatKhaoSat, xuatDanhGia, xuatSanPham, xuatTaiKhoan,
+} = require('../controllers/exportController');
 const router = express.Router();
 const { xacThucQuanLy } = require('../middleware/authQuanLy');
 const { chiAdmin } = require('../middleware/chiAdmin');
@@ -13,7 +16,6 @@ const {
   chiTietKhachHang,
   themKhachHang,
   suaKhachHang,
-  xoaKhachHang,
   doiTrangThaiKhachHang,
   baoCaoKhachHang,
 } = require('../controllers/customerAdminController');
@@ -41,7 +43,6 @@ const {
   doiTrangThaiTaiKhoan,
   themTaiKhoan,
   phanQuyenTaiKhoan,
-  xoaTaiKhoan,
   suaHoTenTaiKhoan,
   datLaiMatKhauTaiKhoan,
 } = require('../controllers/accountAdminController');
@@ -73,11 +74,22 @@ router.get('/tong-quan', tongQuan);
 // Quản lý khách hàng (lưu ý: route tĩnh /bao-cao phải đứng trước route động /:id)
 router.get('/khach-hang', danhSachKhachHang);
 router.post('/khach-hang', themKhachHang);
+// Xuất Excel khách hàng (đặt trước '/khach-hang/:id' để không bị nhầm thành id)
+router.get('/khach-hang/xuat-excel', xuatKhachHang);
+router.get('/khach-hang/bao-cao/xuat-excel', xuatBaoCaoKhachHang);
 router.get('/khach-hang/bao-cao', baoCaoKhachHang);
 router.get('/khach-hang/:id', chiTietKhachHang);
 router.put('/khach-hang/:id', suaKhachHang);
-router.delete('/khach-hang/:id', xoaKhachHang);
+// Không cho xóa khách hàng (giữ lịch sử phản hồi, đánh giá, khảo sát): chỉ khóa hoặc sửa
+router.delete('/khach-hang/:id', (req, res) => {
+  res.status(405).set('Allow', 'GET, PUT, PATCH').json({ message: 'Hệ thống không cho xóa khách hàng. Hãy khóa tài khoản (PATCH /khach-hang/:id/trang-thai) hoặc sửa thông tin.' });
+});
 router.patch('/khach-hang/:id/trang-thai', doiTrangThaiKhachHang);
+
+// Xuất Excel (.xlsx) — dùng lại bộ lọc của trang danh sách, xuất toàn bộ kết quả
+router.get('/phan-hoi/xuat-excel', xuatPhanHoi);
+router.get('/khao-sat/:id/xuat-excel', xuatKhaoSat);
+router.get('/danh-gia/xuat-excel', xuatDanhGia);
 
 // Tiếp nhận & trả lời phản hồi
 router.get('/phan-hoi', danhSachPhanHoi);
@@ -99,6 +111,7 @@ router.get('/danh-gia/nhan-vien/:id/nhan-xet', nhanXetNhanVien);
 // ===== Khu vực ADMIN - tách biệt, chỉ vai_tro = 'admin' mới truy cập được =====
 
 // Quản lý sản phẩm (thực đơn)
+router.get('/san-pham/xuat-excel', chiAdmin, xuatSanPham);
 router.get('/san-pham', chiAdmin, danhSachSanPham);
 router.get('/san-pham/danh-muc', chiAdmin, danhSachDanhMuc);
 router.post('/san-pham', chiAdmin, themSanPham);
@@ -117,12 +130,16 @@ router.post('/san-pham/upload-anh', chiAdmin, (req, res, next) => {
 // Quản lý tài khoản & phân quyền
 // GET nới cho cả 'quan_ly' để họ xem danh sách và tạo QR cho nhân viên;
 // thêm/sửa/xóa/phân quyền/đặt lại mật khẩu vẫn chỉ 'admin'
+router.get('/tai-khoan/xuat-excel', chiAdmin, xuatTaiKhoan);
 router.get('/tai-khoan', chiAdminHoacQuanLy, danhSachTaiKhoan);
 router.post('/tai-khoan', chiAdmin, themTaiKhoan);
 router.patch('/tai-khoan/:id/vai-tro', chiAdmin, phanQuyenTaiKhoan);
 router.patch('/tai-khoan/:id/trang-thai', chiAdmin, doiTrangThaiTaiKhoan);
 router.patch('/tai-khoan/:id/ho-ten', chiAdmin, suaHoTenTaiKhoan);
 router.patch('/tai-khoan/:id/mat-khau', chiAdmin, datLaiMatKhauTaiKhoan);
-router.delete('/tai-khoan/:id', chiAdmin, xoaTaiKhoan);
+// Không cho xóa tài khoản (giữ nguyên lịch sử đánh giá/phản hồi liên quan): chỉ khóa hoặc sửa
+router.delete('/tai-khoan/:id', chiAdmin, (req, res) => {
+  res.status(405).set('Allow', 'GET, PATCH').json({ message: 'Hệ thống không cho xóa tài khoản. Hãy khóa tài khoản (PATCH /tai-khoan/:id/trang-thai) hoặc sửa thông tin.' });
+});
 
 module.exports = router;
